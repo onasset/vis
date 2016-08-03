@@ -6139,9 +6139,10 @@ return /******/ (function(modules) { // webpackBootstrap
    * @param JSONcontainer
    * @param svgContainer
    * @param labelObj
+   * @param elementId
    * @returns {*}
    */
-  exports.drawPoint = function (x, y, groupTemplate, JSONcontainer, svgContainer, labelObj) {
+  exports.drawPoint = function (x, y, groupTemplate, JSONcontainer, svgContainer, labelObj, elementId) {
     var point;
     if (groupTemplate.style == 'image') {
       point = exports.getSVGElement('image', JSONcontainer, svgContainer);
@@ -6188,6 +6189,10 @@ return /******/ (function(modules) { // webpackBootstrap
       }
       label.setAttributeNS(null, "x", x);
       label.setAttributeNS(null, "y", y);
+    }
+
+    if (typeof elementId !== 'undefined' && elementId !== null) {
+      point.setAttributeNS(null, "id", elementId);
     }
 
     return point;
@@ -26007,8 +26012,9 @@ return /******/ (function(modules) { // webpackBootstrap
         }
         //Copy data (because of unmodifiable DataView input.
         var extended = util.bridgeObject(item);
+        extended.id = item.id;
         extended.x = util.convert(item.x, 'Date');
-        extended.orginalY = item.y; //real Y
+        extended.originalY = item.y; //real Y
         extended.y = Number(item.y);
 
         var index = groupsContent[groupId].length - groupCounts[groupId]--;
@@ -26306,9 +26312,9 @@ return /******/ (function(modules) { // webpackBootstrap
       dx = subNextPoint.x - subPrevPoint.x;
       dy = subNextPoint.y - subPrevPoint.y;
       if (dx == 0) {
-        data[j].y = data[j].orginalY + subNextPoint.y;
+        data[j].y = data[j].originalY + subNextPoint.y;
       } else {
-        data[j].y = data[j].orginalY + dy / dx * (data[j].x - subPrevPoint.x) + subPrevPoint.y; // ax + b where b is data[j].y
+        data[j].y = data[j].originalY + dy / dx * (data[j].x - subPrevPoint.x) + subPrevPoint.y; // ax + b where b is data[j].y
       }
     }
   };
@@ -26488,8 +26494,8 @@ return /******/ (function(modules) { // webpackBootstrap
         this.yAxisRight.setRange(minRight, maxRight);
       }
     }
-    resized = this._toggleAxisVisiblity(yAxisLeftUsed, this.yAxisLeft) || resized;
-    resized = this._toggleAxisVisiblity(yAxisRightUsed, this.yAxisRight) || resized;
+    resized = this._toggleAxisVisibility(yAxisLeftUsed, this.yAxisLeft) || resized;
+    resized = this._toggleAxisVisibility(yAxisRightUsed, this.yAxisRight) || resized;
 
     if (yAxisRightUsed == true && yAxisLeftUsed == true) {
       this.yAxisLeft.drawIcons = true;
@@ -26533,7 +26539,7 @@ return /******/ (function(modules) { // webpackBootstrap
    * @private
    * @param axis
    */
-  LineGraph.prototype._toggleAxisVisiblity = function (axisUsed, axis) {
+  LineGraph.prototype._toggleAxisVisibility = function (axisUsed, axis) {
     var changed = false;
     if (axisUsed == false) {
       if (axis.dom.frame.parentNode && axis.hidden == false) {
@@ -27844,11 +27850,11 @@ return /******/ (function(modules) { // webpackBootstrap
     for (var i = 0; i < dataset.length; i++) {
       if (!callback) {
         // draw the point the simple way.
-        DOMutil.drawPoint(dataset[i].screen_x + offset, dataset[i].screen_y, getGroupTemplate(group), framework.svgElements, framework.svg, dataset[i].label);
+        DOMutil.drawPoint(dataset[i].screen_x + offset, dataset[i].screen_y, getGroupTemplate(group), framework.svgElements, framework.svg, dataset[i].label, dataset[i].id);
       } else {
         var callbackResult = callback(dataset[i], group); // result might be true, false or an object
         if (callbackResult === true || (typeof callbackResult === 'undefined' ? 'undefined' : _typeof(callbackResult)) === 'object') {
-          DOMutil.drawPoint(dataset[i].screen_x + offset, dataset[i].screen_y, getGroupTemplate(group, callbackResult), framework.svgElements, framework.svg, dataset[i].label);
+          DOMutil.drawPoint(dataset[i].screen_x + offset, dataset[i].screen_y, getGroupTemplate(group, callbackResult), framework.svgElements, framework.svg, dataset[i].label, dataset[i].id);
         }
       }
     }
