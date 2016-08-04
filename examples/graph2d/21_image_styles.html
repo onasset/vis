@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <title>Graph2d | Scatterplot</title>
+  <title>Graph2d | Image Styles</title>
 
   <style type="text/css">
     body, html {
@@ -16,21 +16,23 @@
   <link href="../../dist/vis.css" rel="stylesheet" type="text/css" />
 <!--<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-61231638-1', 'auto');ga('send', 'pageview');</script></head>-->
 <body>
-<h2>Graph2d | Scatterplot using images with groups + onClick highlighting</h2>
+<h2>Graph2d | Image Styles</h2>
 <div style="width:700px; font-size:14px; text-align: justify;">
-    You can manually disable the automatic sorting of the datapoints by using the <code>sort</code> option. You can use this with the
-    <code>style: 'points'</code> option for making a scatterplot!
+    <code>PointItems</code> can be styled as circles, rectangles, or images.  This example shows how to style points as images.  It also demonstrates how you can respond to PointItem clicks and place another icon "under" the clicked icon to graphically show PointItem selection, also using an image.
+    <code>PointItem</code> styling can be configured using <code>drawPoints</code> property of either the graph options or the group options.
 </div>
 <pre class="prettyprint lang-js">
-var options = {
-    sort: false,
-    sampling:false,
-    style:'points'
+var drawPoints = {
+    enabled: true,
+    size: 32,
+    style: 'image',
+    imageUrl: 'images/halo.png'
 };
 </pre>
 <br />
 <div style="width:700px; font-size:14px; text-align: justify;">
-    This also demos leveraging the "id" attribute of the PointItem element to place a halo around the clicked PointItem
+    This example also demonstrates how the "id" attribute of a <code>DataItem</code> element is used to respond to <code>PointItem</code> clicks.  If the <code>DataItem</code> that a PointItem represents has an "id" attribute,
+    the id attribute is added to the corresponding html element for the <code>PointItem</code> (whether it is a <code>&lt;circle&gt;</code>, <code>&lt;rect&gt;</code>, or <code>&lt;image&gt;</code> element).
 </div>
 <br />
 <div id="visualization"></div>
@@ -40,11 +42,17 @@ var options = {
   var container = document.getElementById('visualization');
   var items = [];
   var numItems = 10;
+  var haloGroupId = 0;
   var checkGroupId = 1;
   var infoGroupId = 2;
   var warningGroupId = 3;
-  var haloGroupId = 0;
   var haloItem = null;
+
+  //NOTE: the DataSet constructor does accept an (optional) options object in which you can specify the fieldId name (in the event the id attribute of the item was something different than 'id')
+  // This instructs the DataSet to use the value of item[fieldId] as the id within the DataSet.  Unfortunately, though, the item[fieldId] value is not
+  // carried through to the drawing layers (not sure why), which prevents the renderer from adding an "id" attribute to the respective html element.
+  // Therefore, in order for the onTap() event handler to work, an explicit 'id' attribute is required on the items.  When an explicit 'id' attribute is included
+  // with the item, the renderer includes the "id" attribute in the html, thereby making the link between html and DataSet item possible.
 
   for (var i = 0; i < numItems; i++) {
       items.push({id: items.length, group: checkGroupId, x: new Date('2014-06-11').valueOf() + Math.floor(Math.random() * 30000), y: 500 + (Math.random() * 100)});
@@ -57,6 +65,7 @@ var options = {
   for (var i = 0; i < numItems; i++) {
       items.push({id: items.length, group: warningGroupId, x: new Date('2014-06-11').valueOf() + Math.floor(Math.random() * 30000), y: 500 + (Math.random() * 100)});
   }
+
 
   var dataset = new vis.DataSet(items);
   var options = {
@@ -72,6 +81,10 @@ var options = {
       },
       height: '600px'
   };
+
+  // the order of the groups matter.  because the haloGroup is the first group in the array, by default all its
+  // PointItems will have the lowest z-index, which means that the halo icons will be drawn "below" any icons
+  // from the other groups
   var groups = [
       {
           id: haloGroupId,
@@ -124,19 +137,26 @@ var options = {
   ];
 
   var graph2d = new vis.Graph2d(container, dataset, groups, options);
-  graph2d.on('click', onClick);
+  graph2d.on('tap', onTap);
 
-  function onClick(props) {
-
+  function onTap(props) {
       if (haloItem) {
+          //remove the previously clicked haloItem from the DataSet, which removes it from the graph
           dataset.remove(haloItem.id);
           haloItem = null;
       }
 
-      var firstTarget = props.event.firstTarget;
-      if (firstTarget.nodeName === 'image' ) {
+      var firstTarget = props.firstTarget;
+
+      //only respond to clicks for the PointItems
+      if (firstTarget.nodeName === 'image' || firstTarget.nodeName === 'circle' || firstTarget.nodeName === 'rect' ) {
+
+          //use the "id" attribute from the firstTarget to get the DataIem that was clicked
           var clickedItem = dataset.get(firstTarget.id);
+
           if (clickedItem && firstTarget.id && firstTarget.id !== 'haloItem') {
+
+              //copy the relevant attributes from the clickedItem so that the haloItem can be placed "beneath" the clicked item
               haloItem = {
                   id: 'haloItem',
                   clickedItemId: clickedItem.id,
@@ -144,6 +164,8 @@ var options = {
                   x: clickedItem.x,
                   y: clickedItem.y
               };
+
+              //add the new haloItem to the DataSet so that it will be displayed on the graph
               dataset.add(haloItem);
           }
       }

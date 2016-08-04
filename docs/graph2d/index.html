@@ -633,13 +633,19 @@ onRender: function(item, group, graph2d) {
             <td class="greenField indent">drawPoints.size</td>
             <td>Number</td>
             <td>6</td>
-            <td>Determine the size at which the data points are drawn.</td>
+            <td>Determine the size at which the data points are drawn.  If the <code>style</code> is 'image', this is the size of the image that will be drawn.</td>
         </tr>
         <tr parent="drawPoints" class="hidden">
             <td class="greenField indent">drawPoints.style</td>
             <td>String</td>
             <td>'square'</td>
-            <td>Determine the shape of the data points. The options are 'square' or 'circle'.</td>
+            <td>Determine the shape of the data points. The options are 'square', 'circle', or 'image'.</td>
+        </tr>
+        <tr parent="drawPoints" class="hidden">
+            <td class="greenField indent">drawPoints.imageUrl</td>
+            <td>String</td>
+            <td></td>
+            <td>The url of the image to draw.  Used only if the <code>style</code> is 'image'</td>
         </tr>
         <tr>
             <td>graphHeight</td>
