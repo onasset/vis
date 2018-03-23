@@ -1,6 +1,9 @@
 vis.js
 ==================
 
+vis.js is the timeline used by the Tracking.Web and Vision.Web projects.  This version has been customized by OnAsset to support placing icons on the timeline.
+
+
 <a href="https://github.com/almende/vis/issues/1781" target="_blank">
   <img align="right" src="https://raw.githubusercontent.com/almende/vis/master/misc/we_need_help.png">
 </a>
